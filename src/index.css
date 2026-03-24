@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* ✅ This is how you enable dark mode in Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f3ef;
+  color: #111;
+}
+
+html.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.hover-glow {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes marqueeVertical {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(-100%); }
+}
