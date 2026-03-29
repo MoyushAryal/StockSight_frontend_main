@@ -16,7 +16,7 @@ export const stocksData = [
     price: "$189",
     change: "+1.2%",
     // Bookmark
-    bookmarked: true,
+    bookmarked: false,
     // Timeseries (replace with real API later)
     timeseries: {
       price: [
@@ -267,6 +267,52 @@ export const newsData = [
     description: "Tesla shares jumped 8% after beating delivery expectations for Q1.",
   },
   {
+    id: 3,
+    title: "Microsoft Expands Cloud Business",
+    publisher: "Bloomberg",
+    image: "https://picsum.photos/600/402",
+    date: "2026-03-09",
+    category: "side",
+    link: "#",
+    description: "Microsoft announces expansion into Southeast Asian cloud markets.",
+  },
+   {
+    id: 3,
+    title: "Microsoft Expands Cloud Business",
+    publisher: "Bloomberg",
+    image: "https://picsum.photos/600/402",
+    date: "2026-03-09",
+    category: "side",
+    link: "#",
+    description: "Microsoft announces expansion into Southeast Asian cloud markets.",
+  }, {
+    id: 3,
+    title: "Microsoft Expands Cloud Business",
+    publisher: "Bloomberg",
+    image: "https://picsum.photos/600/402",
+    date: "2026-03-09",
+    category: "side",
+    link: "#",
+    description: "Microsoft announces expansion into Southeast Asian cloud markets.",
+  }, {
+    id: 3,
+    title: "Microsoft Expands Cloud Business",
+    publisher: "Bloomberg",
+    image: "https://picsum.photos/600/402",
+    date: "2026-03-09",
+    category: "side",
+    link: "#",
+    description: "Microsoft announces expansion into Southeast Asian cloud markets.",
+  }, {
+    id: 3,
+    title: "Microsoft Expands Cloud Business",
+    publisher: "Bloomberg",
+    image: "https://picsum.photos/600/402",
+    date: "2026-03-09",
+    category: "side",
+    link: "#",
+    description: "Microsoft announces expansion into Southeast Asian cloud markets.",
+  }, {
     id: 3,
     title: "Microsoft Expands Cloud Business",
     publisher: "Bloomberg",
