@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE = "http://127.0.0.1:8000/api/users";
@@ -7,6 +6,12 @@ const API_BASE = "http://127.0.0.1:8000/api/users";
 function Auth() {
   const [isReg, setIsReg] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/dashboard");
+    }
+  }, []);
 
   const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
@@ -58,7 +63,7 @@ function Auth() {
   };
 
   const handleForgotPassword = () => {
-    // ************************* JASON API YA CALL HUNCHA AFTER YOU CREATE A END POINT 
+    // ************************* API CALL HUNCHA AFTER YOU CREATE A END POINT
     alert("Please contact support to reset your password.");
   };
 
@@ -106,7 +111,7 @@ function Auth() {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-white flex">
 
-      {/* Left — Login Form */}
+      {/* Left login form -> suru ma visible */}
       <div className="w-1/2 h-full flex flex-col items-center justify-center">
         <div className="w-80 flex flex-col">
           <h1 className="text-xl font-semibold text-blue-700 mb-1">
@@ -119,6 +124,7 @@ function Auth() {
             placeholder="Username"
             value={loginData.username}
             onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
           />
           <input
@@ -126,6 +132,7 @@ function Auth() {
             placeholder="Password"
             value={loginData.password}
             onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-2 outline-none focus:border-blue-500"
           />
 
@@ -150,7 +157,7 @@ function Auth() {
         </div>
       </div>
 
-      {/* Right — Register Form (behind blue panel) */}
+      {/* reg form - > lukeako huncha suru ma  */}
       <div
         className={`absolute right-0 top-0 w-1/2 h-full flex flex-col items-center justify-center transition-opacity duration-300 ${
           isReg ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -189,6 +196,7 @@ function Auth() {
             placeholder="Confirm password"
             value={regData.confirmPassword}
             onChange={(e) => setRegData({ ...regData, confirmPassword: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && handleRegister()}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
           />
 
@@ -212,7 +220,7 @@ function Auth() {
         </div>
       </div>
 
-      {/* Blue Sliding Panel */}
+      {/* Slide animation wala part .... ignore this  */}
       <div
         className="absolute top-0 left-1/2 w-1/2 h-full bg-blue-700 flex flex-col items-center justify-center px-20 z-10 transition-transform duration-700"
         style={{
