@@ -7,6 +7,7 @@ import StockListing from "./pages/StockListing";
 import News from "./pages/News";
 import BookmarkPage from "./pages/Bookmark";
 import Auth from "./pages/Auth/Auth";
+import Profile from "./components/ProfileModal";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -56,6 +57,11 @@ function App() {
         <Route path="/bookmarks" element={
           <ProtectedRoute>
             <MainLayout><BookmarkPage /></MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <MainLayout><Profile /></MainLayout>
           </ProtectedRoute>
         } />
 
