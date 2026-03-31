@@ -9,6 +9,7 @@ import BookmarkPage from "./pages/Bookmark";
 import Auth from "./pages/Auth/Auth";
 import Profile from "./components/ProfileModal";
 
+
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" />;
