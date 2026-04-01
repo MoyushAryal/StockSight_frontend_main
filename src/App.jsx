@@ -8,7 +8,7 @@ import News from "./pages/News";
 import BookmarkPage from "./pages/Bookmark";
 import Auth from "./pages/Auth/Auth";
 import Profile from "./components/ProfileModal";
-
+import ResetPassword from "./pages/Auth/ResetPassword"; 
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -33,8 +33,11 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
         <Route path="/login" element={<Auth />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} /> {/* ← uses ResetPassword.jsx */}
 
+        {/* Protected routes */}
         <Route path="/" element={
           <ProtectedRoute>
             <MainLayout><Dashboard /></MainLayout>
