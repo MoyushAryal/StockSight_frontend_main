@@ -33,9 +33,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
+        
         <Route path="/login" element={<Auth />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} /> {/* ← uses ResetPassword.jsx */}
+        <Route path="/reset-password/:token" element={<ResetPassword />} /> 
 
         {/* Protected routes */}
         <Route path="/" element={
