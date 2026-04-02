@@ -34,7 +34,7 @@ function BookmarkPage() {
       <div className="grid grid-cols-3 gap-6 mb-8">
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 transition-colors duration-300">
-          <div className="flex items-center gap-2 mb-5">dgmlklsjtakfgjjs;togndsfg;kj
+          <div className="flex items-center gap-2 mb-5">
             <div className="w-1 h-5 rounded-full bg-blue-600"></div> 
             <h2 className="text-blue-600 font-extrabold text-base">Stock Bookmarks</h2>
           </div>

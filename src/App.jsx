@@ -3,6 +3,8 @@ import Navbar from "./components/navBar";
 import Sidebar from "./components/Sidebar";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import Prediction from "./pages/Prediction";
+import StockPredictionResult from "./pages/Prediction/components/prediction_result";
 import StockListing from "./pages/StockListing";
 import News from "./pages/News";
 import BookmarkPage from "./pages/Bookmark";
@@ -48,11 +50,20 @@ function App() {
             <MainLayout><StockListing /></MainLayout>
           </ProtectedRoute>
         } />
+        <Route path="/prediction-panel" element={
+          <ProtectedRoute>
+            <MainLayout><Prediction /></MainLayout>
+          </ProtectedRoute>
+        } />
         <Route path="/news" element={
           <ProtectedRoute>
             <MainLayout><News /></MainLayout>
           </ProtectedRoute>
         } />
+        <Route path="/predict/result" element={
+          <ProtectedRoute>
+            <MainLayout><StockPredictionResult /></MainLayout>
+          </ProtectedRoute>} />
         <Route path="/bookmarks" element={
           <ProtectedRoute>
             <MainLayout><BookmarkPage /></MainLayout>
