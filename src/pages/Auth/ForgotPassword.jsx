@@ -19,7 +19,7 @@ function ForgotPassword({ onBack }) {
       const response = await fetch(`${API_BASE}/forgot-password/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email }),   // eesma key ra varialbe same xa 
       });
       const data = await response.json();
       if (response.ok) {

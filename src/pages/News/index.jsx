@@ -65,7 +65,7 @@ function News() {
       setActiveGlobalIndex(prev => (prev + 1) % global.length);
     }, 60000);
     return () => clearInterval(interval);
-  }, [global.length]);
+  }, [global.length]);   // harek 60 sec ma rotate
 
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-900 p-8 space-y-14 transition-colors duration-300">

@@ -69,7 +69,7 @@ function Profile() {
       });
       const data = await response.json();
       if (response.ok) {
-        setProfile(data);
+        setProfile(data);   // Aaba ui update garna miliyo ellea
         setIsEditing(false);
         setError("");
       } else {
@@ -87,7 +87,7 @@ function Profile() {
       await fetch(`${API_BASE}/users/logout/`, {
         method: "POST",
         headers: {
-          "Authorization": `Token ${token}`,
+          "Authorization": `Token ${token}`,   // kun chai user hatauni ? 
           "Content-Type": "application/json",
         },
       });
@@ -111,7 +111,7 @@ function Profile() {
   return (
     <div className="w-full h-full overflow-y-auto bg-gray-50 dark:bg-gray-950 p-8">
 
-      {/* Top Banner */}
+  
       <div className="relative w-full h-40 bg-blue-600 rounded-2xl mb-16">
         <div className="absolute -bottom-12 left-10 flex items-end gap-6">
           <div className="w-24 h-24 rounded-full border-4 border-white dark:border-gray-950 overflow-hidden bg-gray-200 flex items-center justify-center shadow-lg">
@@ -129,7 +129,7 @@ function Profile() {
           </div>
         </div>
 
-        {/* Logout button top right */}
+      
         <button
           onClick={handleLogout}
           className="absolute top-4 right-4 px-4 py-2 bg-white/20 hover:bg-white/30 text-white text-sm rounded-full transition-colors"
@@ -138,13 +138,11 @@ function Profile() {
         </button>
       </div>
 
-      {/* Main Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
 
-        {/* Left — Profile Details */}
+        
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Profile Info Card */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-gray-800 dark:text-white border-l-4 border-blue-600 pl-3">

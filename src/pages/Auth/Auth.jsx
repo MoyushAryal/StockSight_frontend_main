@@ -24,7 +24,7 @@ function Auth() {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-white flex">
 
-      {/* Left — Login or Forgot Password */}
+      {/*  Login or Forgot Password */}
       <div className="w-1/2 h-full flex flex-col items-center justify-center">
         {isForgot ? (
           <ForgotPassword onBack={() => setIsForgot(false)} />
@@ -36,7 +36,6 @@ function Auth() {
         )}
       </div>
 
-      {/* Right — Register */}
       <div
         className={`absolute right-0 top-0 w-1/2 h-full flex flex-col items-center justify-center transition-opacity duration-300 ${
           isReg ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -49,12 +48,11 @@ function Auth() {
         />
       </div>
 
-      {/* Blue Sliding Panel */}
       <div
         className="absolute top-0 left-1/2 w-1/2 h-full bg-blue-700 flex flex-col items-center justify-center px-20 z-10 transition-transform duration-700"
         style={{
-          transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
-          transform: isReg ? "translateX(-100%)" : "translateX(0)",
+          transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",  // yo animation lai ho i have no idea k ho 
+          transform: isReg ? "translateX(-100%)" : "translateX(0)",  // ellea chai hamle silder banako
         }}
       >
         <h2 className="text-xl font-medium text-white text-center mb-3">
