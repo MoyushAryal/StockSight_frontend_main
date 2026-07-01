@@ -1,24 +1,18 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
 import { newsData } from '../../../data/appData';
 import { useTheme } from '../../../context/ThemeContext';
 
 const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { amount: 0.5, triggerOnce: false });
   return (
-    <motion.div
-      ref={ref}
+    <div
       data-index={index}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
-      initial={{ scale: 0.7, opacity: 0 }}
-      animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
-      transition={{ duration: 0.2, delay }}
-      className="mb-4 cursor-pointer"
+      className="mb-4 cursor-pointer transition-opacity duration-200"
+      style={{ transitionDelay: `${delay}s` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 
@@ -97,7 +91,6 @@ const NewsSection = ({
         container.scrollTo({ top: itemBottom - containerHeight + extraMargin, behavior: 'smooth' });
       }
     }
-    setKeyboardNav(false);
   }, [selectedIndex, keyboardNav]);
 
   return (

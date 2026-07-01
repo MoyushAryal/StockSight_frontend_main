@@ -1,50 +1,89 @@
-import React from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import React, { useMemo } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useTheme } from "../../../context/ThemeContext";
+import { stocksData } from "../../../data/appData";
 
-const data = [
-  { name: "Jan", PV: 4000, cv: 2400 },
-  { name: "Feb", PV: 3000, cv: 1398 },
-  { name: "Mar", PV: 2000, cv: 9800 },
-  { name: "Apr", PV: 2780, cv: 3908 },
-  { name: "May", PV: 1890, cv: 4800 },
-  { name: "Jun", PV: 2390, cv: 3800 },
-];
+const parseChange = (change) => Number.parseFloat(String(change).replace("%", "")) || 0;
 
-const margin = { top: 20, right: 30, left: 20, bottom: 5 };
+function buildSectorData() {
+  const sectors = stocksData.reduce((acc, stock) => {
+    if (!acc[stock.sector]) {
+      acc[stock.sector] = { sector: stock.sector, totalChange: 0, stockCount: 0, positiveCount: 0 };
+    }
+
+    const change = parseChange(stock.change);
+    acc[stock.sector].totalChange += change;
+    acc[stock.sector].stockCount += 1;
+    if (change > 0) acc[stock.sector].positiveCount += 1;
+
+    return acc;
+  }, {});
+
+  return Object.values(sectors)
+    .map((sector) => ({
+      sector: sector.sector,
+      averageMove: Number((sector.totalChange / sector.stockCount).toFixed(2)),
+      stockCount: sector.stockCount,
+      positiveCount: sector.positiveCount,
+    }))
+    .sort((a, b) => b.averageMove - a.averageMove);
+}
 
 function CustomizeLegendAndTooltipStyle() {
   const { isDark } = useTheme();
+  const data = useMemo(buildSectorData, []);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data} margin={margin}>
+      <BarChart data={data} margin={{ top: 12, right: 18, left: 0, bottom: 8 }} barGap={6}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "#374151" : "#E5E7EB"} />
         <XAxis
-          dataKey="name"
-          stroke={isDark ? "#9CA3AF" : "#8884d8"}
-          tick={{ fill: isDark ? "#9CA3AF" : "#6B7280" }}
+          dataKey="sector"
+          interval={0}
+          angle={-18}
+          textAnchor="end"
+          height={60}
+          stroke={isDark ? "#9CA3AF" : "#6B7280"}
+          tick={{ fill: isDark ? "#D1D5DB" : "#4B5563", fontSize: 11 }}
         />
         <YAxis
-          stroke={isDark ? "#9CA3AF" : "#8884d8"}
-          tick={{ fill: isDark ? "#9CA3AF" : "#6B7280" }}
+          yAxisId="left"
+          stroke={isDark ? "#9CA3AF" : "#6B7280"}
+          tick={{ fill: isDark ? "#D1D5DB" : "#4B5563", fontSize: 11 }}
+          tickFormatter={(value) => `${value}%`}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          stroke={isDark ? "#9CA3AF" : "#6B7280"}
+          tick={{ fill: isDark ? "#D1D5DB" : "#4B5563", fontSize: 11 }}
         />
         <Tooltip
-          wrapperStyle={{
-            width: 120,
-            backgroundColor: isDark ? '#374151' : '#1F2937',
-            color: 'white',
-            border: 'none',
-            padding: '8px',
-            borderRadius: '6px',
-          }}
+          cursor={{ fill: isDark ? "rgba(59,130,246,0.12)" : "rgba(37,99,235,0.08)" }}
           contentStyle={{
-            backgroundColor: isDark ? '#374151' : '#1F2937',
-            border: 'none',
-            color: 'white',
+            backgroundColor: isDark ? "#111827" : "#FFFFFF",
+            border: `1px solid ${isDark ? "#374151" : "#E5E7EB"}`,
+            borderRadius: "8px",
+            color: isDark ? "#F9FAFB" : "#111827",
+            boxShadow: "0 18px 45px rgba(15,23,42,0.18)",
+          }}
+          formatter={(value, name) => {
+            if (name === "Average move") return [`${value}%`, name];
+            return [value, name];
           }}
         />
-        <Bar dataKey="PV" fill="#2563EB" barSize={30} />
-        <Bar dataKey="cv" fill="#82ca9d" barSize={30} />
+        <Legend iconType="circle" wrapperStyle={{ fontSize: 12, color: isDark ? "#D1D5DB" : "#4B5563" }} />
+        <Bar yAxisId="left" dataKey="averageMove" name="Average move" fill="#2563EB" radius={[6, 6, 0, 0]} maxBarSize={42} />
+        <Bar yAxisId="right" dataKey="stockCount" name="Stocks covered" fill="#F59E0B" radius={[6, 6, 0, 0]} maxBarSize={42} />
       </BarChart>
     </ResponsiveContainer>
   );

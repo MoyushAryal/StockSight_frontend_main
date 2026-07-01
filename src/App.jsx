@@ -3,12 +3,16 @@ import Navbar from "./components/navBar";
 import Sidebar from "./components/Sidebar";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import Prediction from "./pages/Prediction";
+import StockPredictionResult from "./pages/Prediction/components/prediction_result";
 import StockListing from "./pages/StockListing";
 import News from "./pages/News";
+import NewsDetail from "./pages/News/NewsDetail";
 import BookmarkPage from "./pages/Bookmark";
 import Auth from "./pages/Auth/Auth";
 import Profile from "./components/ProfileModal";
-
+import ResetPassword from "./pages/Auth/ResetPassword"; 
+import Pricing from "./pages/Pricing";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -33,8 +37,11 @@ function App() {
   return (
     <Router>
       <Routes>
+        
         <Route path="/login" element={<Auth />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} /> 
 
+        {/* Protected routes */}
         <Route path="/" element={
           <ProtectedRoute>
             <MainLayout><Dashboard /></MainLayout>
@@ -50,11 +57,30 @@ function App() {
             <MainLayout><StockListing /></MainLayout>
           </ProtectedRoute>
         } />
+        <Route path="/prediction-panel" element={
+          <ProtectedRoute>
+            <MainLayout><Prediction /></MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/pricing" element={
+          <ProtectedRoute>
+            <MainLayout><Pricing /></MainLayout>
+          </ProtectedRoute>
+        } />
         <Route path="/news" element={
           <ProtectedRoute>
             <MainLayout><News /></MainLayout>
           </ProtectedRoute>
         } />
+        <Route path="/news/:newsId" element={
+          <ProtectedRoute>
+            <MainLayout><NewsDetail /></MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/predict/result" element={
+          <ProtectedRoute>
+            <MainLayout><StockPredictionResult /></MainLayout>
+          </ProtectedRoute>} />
         <Route path="/bookmarks" element={
           <ProtectedRoute>
             <MainLayout><BookmarkPage /></MainLayout>
