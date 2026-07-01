@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-const API_BASE = "http://127.0.0.1:8000/api/users";
+const API_BASE = "/api/users";
 
 function ResetPassword() {
   const { token } = useParams();
@@ -43,7 +43,7 @@ function ResetPassword() {
       } else {
         setError(data.error || Object.values(data)[0] || "Something went wrong.");
       }
-    } catch (err) {
+    } catch {
       setError("Could not connect to server.");
     } finally {
       setLoading(false);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -52,41 +52,29 @@ export default function StockPredictionResult() {
   const { ticker, days, predictData } = location.state || {};
 
   const [tickerInfo, setTickerInfo] = useState(null);
-  const [recentPrices, setRecentPrices] = useState([]);
   const [showAllInfo, setShowAllInfo] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!predictData) {
       navigate("/prediction-panel");
       return;
     }
-    fetchTickerInfo();
 
-    if (predictData.current_value) {
-      setRecentPrices(
-        predictData.current_value.map((price, i) => ({
-          date: `Day ${i + 1}`,
-          price: parseFloat(price.toFixed(2)),
-        }))
-      );
-    }
+    const token = localStorage.getItem("token");
+    fetch(`/api/prediction/ticker-info/?ticker=${ticker}`, {
+      headers: { "Authorization": `Token ${token}` },
+    })
+      .then(response => response.json())
+      .then(data => setTickerInfo(data))
+      .catch(() => setTickerInfo({ Symbol: ticker }));
+  }, [navigate, predictData, ticker]);
 
-    setTimeout(() => setLoaded(true), 80);
-  }, []);
-
-  const fetchTickerInfo = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/prediction/ticker-info/?ticker=${ticker}`, {
-        headers: { "Authorization": `Token ${token}` },
-      });
-      const data = await response.json();
-      setTickerInfo(data);
-    } catch {
-      setTickerInfo({ Symbol: ticker });
-    }
-  };
+  const recentPrices = useMemo(() => {
+    return (predictData?.current_value || []).map((price, i) => ({
+      date: `Day ${i + 1}`,
+      price: parseFloat(price.toFixed(2)),
+    }));
+  }, [predictData]);
 
   if (!predictData) return null;
 
@@ -103,7 +91,7 @@ export default function StockPredictionResult() {
   const gridStroke = isDark ? "#374151" : "#e5e7eb";
 
   return (
-    <div className={`min-h-screen font-sans transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"} ${isDark ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-700"}`}>
+    <div className={`min-h-screen font-sans ${isDark ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-700"}`}>
 
       {/* Top bar */}
       <div className={`sticky top-0 z-50 flex items-center justify-between px-6 h-14 border-b ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>

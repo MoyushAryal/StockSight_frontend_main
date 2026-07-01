@@ -1,12 +1,15 @@
 import React from "react";
 
-function FilterSection() {
+function FilterSection({ count, total }) {
   return (
     <div className="flex w-full">
       <div className="flex items-center w-[500px]">
         <button className="px-4 py-2 font-bold text-2xl text-blue-600">
           Stocks
         </button>
+        <span className="text-sm font-semibold text-gray-400">
+          {count} of {total}
+        </span>
       </div>
 
       <div className="flex items-center gap-10">

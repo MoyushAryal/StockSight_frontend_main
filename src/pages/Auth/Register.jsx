@@ -1,7 +1,7 @@
 // src/pages/Auth/Register.jsx
 import React, { useState } from "react";
 
-const API_BASE = "http://127.0.0.1:8000/api/users";
+const API_BASE = "/api/users";
 
 function Register({ onToggle, onRegisterSuccess }) {
   const [regData, setRegData] = useState({
@@ -41,13 +41,15 @@ function Register({ onToggle, onRegisterSuccess }) {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        onRegisterSuccess();
+        const username = data.username || regData.username;
+        localStorage.setItem("username", username);
+        window.dispatchEvent(new Event("auth-user-changed"));
+        onRegisterSuccess(username);
       } else {
         const firstError = Object.values(data)[0];
         setRegError(Array.isArray(firstError) ? firstError[0] : firstError);
       }
-    } catch (err) {
+    } catch {
       setRegError("Could not connect to server.");
     } finally {
       setRegLoading(false);

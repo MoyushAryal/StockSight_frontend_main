@@ -1,4 +1,3 @@
-import { motion, useInView } from 'framer-motion';
 import React, { useState, useEffect } from "react";
 import { format } from 'date-fns';
 import NepaliDate from 'nepali-date-converter';

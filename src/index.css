@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* ✅ This is how you enable dark mode in Tailwind v4 */
 @variant dark (&:where(.dark, .dark *));
 
 body {

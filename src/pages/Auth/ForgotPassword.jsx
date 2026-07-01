@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const API_BASE = "http://127.0.0.1:8000/api/users";
+const API_BASE = "/api/users";
 
 function ForgotPassword({ onBack }) {
   const [email, setEmail] = useState("");
@@ -27,7 +27,7 @@ function ForgotPassword({ onBack }) {
       } else {
         setError(data.error || "Something went wrong.");
       }
-    } catch (err) {
+    } catch {
       setError("Could not connect to server.");
     } finally {
       setLoading(false);

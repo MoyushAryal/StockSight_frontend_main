@@ -4,34 +4,45 @@ import { useNavigate } from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
 import ForgotPassword from "./ForgotPassword";
+import { useNotification } from "../../context/NotificationContext";
 
 function Auth() {
   const [isReg, setIsReg] = useState(false);
   const [isForgot, setIsForgot] = useState(false);
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
       navigate("/dashboard");
     }
-  }, []);
+  }, [navigate]);
 
   const toggle = () => {
     setIsReg(!isReg);
     setIsForgot(false);
   };
 
+  const handleLoginSuccess = (username) => {
+    addNotification(`Welcome back, ${username}!`, "login");
+    navigate("/dashboard");
+  };
+
+  const handleRegisterSuccess = (username) => {
+    addNotification(`Welcome to StockSight, ${username}!`, "login");
+    navigate("/dashboard");
+  };
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-white flex">
 
-      {/*  Login or Forgot Password */}
       <div className="w-1/2 h-full flex flex-col items-center justify-center">
         {isForgot ? (
           <ForgotPassword onBack={() => setIsForgot(false)} />
         ) : (
           <Login
             onForgot={() => setIsForgot(true)}
-            onLoginSuccess={() => navigate("/dashboard")}
+            onLoginSuccess={handleLoginSuccess}
           />
         )}
       </div>
@@ -44,15 +55,15 @@ function Auth() {
       >
         <Register
           onToggle={toggle}
-          onRegisterSuccess={() => navigate("/dashboard")}
+          onRegisterSuccess={handleRegisterSuccess}
         />
       </div>
 
       <div
         className="absolute top-0 left-1/2 w-1/2 h-full bg-blue-700 flex flex-col items-center justify-center px-20 z-10 transition-transform duration-700"
         style={{
-          transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",  // yo animation lai ho i have no idea k ho 
-          transform: isReg ? "translateX(-100%)" : "translateX(0)",  // ellea chai hamle silder banako
+          transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
+          transform: isReg ? "translateX(-100%)" : "translateX(0)",
         }}
       >
         <h2 className="text-xl font-medium text-white text-center mb-3">
@@ -65,7 +76,7 @@ function Auth() {
         </p>
         <button
           onClick={toggle}
-          className="px-8 py-2 rounded-full text-sm border border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-white transition-colors duration-200"
+          className="px-8 py-2 rounded-full text-sm border border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-colors duration-200"
         >
           {isReg ? "Sign In" : "Sign Up"}
         </button>

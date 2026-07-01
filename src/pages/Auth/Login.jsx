@@ -1,7 +1,7 @@
 // src/pages/Auth/Login.jsx
 import React, { useState } from "react";
 
-const API_BASE = "http://127.0.0.1:8000/api/users";
+const API_BASE = "/api/users";
 
 function Login({ onForgot, onLoginSuccess }) {
   const [loginData, setLoginData] = useState({ username: "", password: "" });
@@ -26,12 +26,14 @@ function Login({ onForgot, onLoginSuccess }) {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        onLoginSuccess();
+        const username = data.username || loginData.username;
+        localStorage.setItem("username", username);
+        window.dispatchEvent(new Event("auth-user-changed"));
+        onLoginSuccess(username);
       } else {
         setLoginError(data.error || "Invalid credentials.");
       }
-    } catch (err) {
+    } catch {
       setLoginError("Could not connect to server.");
     } finally {
       setLoginLoading(false);
