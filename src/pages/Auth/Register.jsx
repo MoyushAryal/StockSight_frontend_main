@@ -69,21 +69,21 @@ function Register({ onToggle, onRegisterSuccess }) {
         placeholder="Username"
         value={regData.username}
         onChange={(e) => setRegData({ ...regData, username: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-3 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
       />
       <input
         type="email"
         placeholder="Email address"
         value={regData.email}
         onChange={(e) => setRegData({ ...regData, email: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-3 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
       />
       <input
         type="password"
         placeholder="Password"
         value={regData.password}
         onChange={(e) => setRegData({ ...regData, password: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-3 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
       />
       <input
         type="password"
@@ -91,7 +91,7 @@ function Register({ onToggle, onRegisterSuccess }) {
         value={regData.confirmPassword}
         onChange={(e) => setRegData({ ...regData, confirmPassword: e.target.value })}
         onKeyDown={(e) => e.key === "Enter" && handleRegister()}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-3 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
       />
 
       {regError && <p className="text-xs text-red-500 mb-2">{regError}</p>}

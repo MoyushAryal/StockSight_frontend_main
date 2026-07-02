@@ -34,7 +34,7 @@ function Auth() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-white flex">
+    <div className="relative w-screen h-screen overflow-hidden bg-white text-gray-900 flex dark:bg-white dark:text-gray-900">
 
       <div className="w-1/2 h-full flex flex-col items-center justify-center">
         {isForgot ? (

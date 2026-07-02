@@ -14,6 +14,7 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 import { getBookmarkTicker } from "../utils/bookmarkNews";
+import { clearSubscriptionCache } from "../utils/subscription";
 
 const API_BASE = "/api";
 
@@ -218,6 +219,7 @@ function Profile() {
       localStorage.removeItem("username");
       localStorage.removeItem("display_name");
       localStorage.removeItem("profile_picture_url");
+      clearSubscriptionCache();
       window.dispatchEvent(new Event("auth-user-changed"));
       window.dispatchEvent(new Event("profile-picture-updated"));
       navigate("/login");

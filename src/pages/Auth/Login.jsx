@@ -54,7 +54,7 @@ function Login({ onForgot, onLoginSuccess }) {
         value={loginData.username}
         onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
         onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-3 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
       />
       <input
         type="password"
@@ -62,7 +62,7 @@ function Login({ onForgot, onLoginSuccess }) {
         value={loginData.password}
         onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
         onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-2 outline-none focus:border-blue-500"
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-2 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
       />
 
       {loginError && <p className="text-xs text-red-500 mb-2">{loginError}</p>}

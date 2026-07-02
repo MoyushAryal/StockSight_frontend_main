@@ -81,7 +81,7 @@ function ResetPassword() {
                 placeholder="New password"
                 value={formData.new_password}
                 onChange={(e) => setFormData({ ...formData, new_password: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-3 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
               />
               <input
                 type="password"
@@ -89,7 +89,7 @@ function ResetPassword() {
                 value={formData.confirm_password}
                 onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-3 outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-900 placeholder-gray-400 mb-3 outline-none focus:border-blue-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-400"
               />
 
               {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
