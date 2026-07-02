@@ -28,6 +28,7 @@ function Login({ onForgot, onLoginSuccess }) {
         localStorage.setItem("token", data.token);
         const username = data.username || loginData.username;
         localStorage.setItem("username", username);
+        localStorage.setItem("display_name", data.full_name || username);
         window.dispatchEvent(new Event("auth-user-changed"));
         onLoginSuccess(username);
       } else {

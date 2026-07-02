@@ -43,6 +43,7 @@ function Register({ onToggle, onRegisterSuccess }) {
         localStorage.setItem("token", data.token);
         const username = data.username || regData.username;
         localStorage.setItem("username", username);
+        localStorage.setItem("display_name", data.full_name || username);
         window.dispatchEvent(new Event("auth-user-changed"));
         onRegisterSuccess(username);
       } else {

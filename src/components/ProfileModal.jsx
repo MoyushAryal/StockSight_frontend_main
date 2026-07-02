@@ -3,12 +3,14 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaBookmark,
+  FaCamera,
   FaEdit,
   FaEnvelope,
   FaMapMarkerAlt,
   FaPhone,
   FaSave,
   FaSignOutAlt,
+  FaTrash,
   FaUserCircle,
 } from "react-icons/fa";
 import { getBookmarkTicker } from "../utils/bookmarkNews";
@@ -22,6 +24,7 @@ function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({ full_name: "", bio: "", phone_number: "" });
   const [saveLoading, setSaveLoading] = useState(false);
+  const [pictureLoading, setPictureLoading] = useState(false);
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
@@ -29,6 +32,7 @@ function Profile() {
 
   const displayName = profile?.full_name || profile?.username || "StockSight User";
   const description = profile?.bio || "Tracking markets, saving signals, and building a sharper watchlist.";
+  const profilePictureUrl = profile?.profile_picture_url || profile?.profile_picture || "";
 
   const initials = useMemo(() => {
     return displayName
@@ -52,6 +56,13 @@ function Profile() {
 
       const data = await response.json();
       setProfile(data);
+      localStorage.setItem("display_name", data.full_name || data.username || "User");
+      if (data.profile_picture_url) {
+        localStorage.setItem("profile_picture_url", data.profile_picture_url);
+      } else {
+        localStorage.removeItem("profile_picture_url");
+      }
+      window.dispatchEvent(new Event("profile-picture-updated"));
       setEditData({
         full_name: data.full_name || "",
         bio: data.bio || "",
@@ -82,8 +93,10 @@ function Profile() {
   }, [token]);
 
   useEffect(() => {
-    fetchProfile();
-    fetchBookmarks();
+    Promise.resolve().then(() => {
+      fetchProfile();
+      fetchBookmarks();
+    });
   }, [fetchProfile, fetchBookmarks]);
 
   const handleSave = async () => {
@@ -103,6 +116,8 @@ function Profile() {
 
       if (response.ok) {
         setProfile(data);
+        localStorage.setItem("display_name", data.full_name || data.username || "User");
+        window.dispatchEvent(new Event("auth-user-changed"));
         setIsEditing(false);
         setError("");
       } else {
@@ -112,6 +127,78 @@ function Profile() {
       setError("Could not save profile.");
     } finally {
       setSaveLoading(false);
+    }
+  };
+
+  const handlePictureChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Profile picture must be a JPEG, PNG, or WEBP image.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Profile picture must be 5MB or smaller.");
+      return;
+    }
+
+    setPictureLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("profile_picture", file);
+
+      const response = await fetch(`${API_BASE}/users/profile/picture/`, {
+        method: "PUT",
+        headers: { "Authorization": `Token ${token}` },
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error("Could not update profile picture.");
+      }
+
+      setProfile((current) => ({ ...current, ...data }));
+      if (data.profile_picture_url) {
+        localStorage.setItem("profile_picture_url", data.profile_picture_url);
+      } else {
+        localStorage.removeItem("profile_picture_url");
+      }
+      window.dispatchEvent(new Event("profile-picture-updated"));
+      setError("");
+    } catch {
+      setError("Could not update profile picture.");
+    } finally {
+      setPictureLoading(false);
+    }
+  };
+
+  const handleRemovePicture = async () => {
+    setPictureLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/users/profile/picture/`, {
+        method: "DELETE",
+        headers: { "Authorization": `Token ${token}` },
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error("Could not remove profile picture.");
+      }
+
+      setProfile((current) => ({ ...current, ...data }));
+      localStorage.removeItem("profile_picture_url");
+      window.dispatchEvent(new Event("profile-picture-updated"));
+      setError("");
+    } catch {
+      setError("Could not remove profile picture.");
+    } finally {
+      setPictureLoading(false);
     }
   };
 
@@ -129,7 +216,10 @@ function Profile() {
     } finally {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
+      localStorage.removeItem("display_name");
+      localStorage.removeItem("profile_picture_url");
       window.dispatchEvent(new Event("auth-user-changed"));
+      window.dispatchEvent(new Event("profile-picture-updated"));
       navigate("/login");
     }
   };
@@ -159,12 +249,35 @@ function Profile() {
         <div className="px-6 pb-8">
           <div className="-mt-14 flex flex-col items-center text-center">
             <div className="relative z-10 h-32 w-32 rounded-full border-4 border-white dark:border-gray-900 bg-gray-100 dark:bg-gray-800 shadow-lg overflow-hidden flex items-center justify-center">
-              {profile?.profile_picture ? (
-                <img src={profile.profile_picture} alt={displayName} className="h-full w-full object-cover" />
+              {profilePictureUrl ? (
+                <img src={profilePictureUrl} alt={displayName} className="h-full w-full object-cover" />
               ) : initials ? (
                 <span className="text-4xl font-black text-blue-600">{initials}</span>
               ) : (
                 <FaUserCircle className="h-full w-full text-gray-300" />
+              )}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+              <label className={`inline-flex cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 ${pictureLoading ? "pointer-events-none opacity-60" : ""}`}>
+                <FaCamera />
+                {pictureLoading ? "Updating..." : "Upload Photo"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handlePictureChange}
+                  className="sr-only"
+                  disabled={pictureLoading}
+                />
+              </label>
+              {profilePictureUrl && (
+                <button
+                  type="button"
+                  onClick={handleRemovePicture}
+                  disabled={pictureLoading}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-60 dark:border-gray-700 dark:text-gray-200"
+                >
+                  <FaTrash /> Remove
+                </button>
               )}
             </div>
 

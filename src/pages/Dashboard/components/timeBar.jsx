@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FaBell, FaChartPie, FaLayerGroup, FaShieldAlt, FaSignal } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaArrowRight, FaChartLine, FaCrown, FaSignal } from "react-icons/fa";
 import { stocksData } from "../../../data/appData";
 import { getBookmarkTicker } from "../../../utils/bookmarkNews";
 import { isUserSubscribed } from "../../../utils/subscription";
@@ -9,6 +10,7 @@ const parseChange = (change) => Number.parseFloat(String(change).replace("%", ""
 
 function Timebar() {
   const [bookmarks, setBookmarks] = useState([]);
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -59,6 +61,13 @@ function Timebar() {
   }, [bookmarks]);
 
   const subscribed = isUserSubscribed();
+  const predictionCandidates = dashboardInsights.volatileStocks.slice(0, 3);
+  const primaryCandidate = predictionCandidates[0];
+  const primaryChange = primaryCandidate ? parseChange(primaryCandidate.change) : 0;
+  const trendDirection = primaryChange >= 0 ? "Bullish" : "Bearish";
+  const confidenceScore = primaryCandidate
+    ? Math.min(94, Math.max(62, Math.round(68 + Math.abs(primaryChange) * 7)))
+    : 0;
 
   return (
     <div className="grid flex-1 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.95fr)] 2xl:min-w-0">
@@ -124,56 +133,101 @@ function Timebar() {
       <section className="rounded-lg bg-white p-5 shadow-md transition-colors duration-300 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-amber-500">Portfolio intelligence</p>
-            <h2 className="mt-2 text-xl font-black text-gray-900 dark:text-white">Readiness checks</h2>
+            <p className="text-xs font-bold uppercase text-blue-600">Prediction center</p>
+            <h2 className="mt-2 text-xl font-black text-gray-900 dark:text-white">Forecast queue</h2>
           </div>
-          <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-900/20">
-            <FaShieldAlt />
+          <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/20">
+            <FaChartLine />
           </span>
         </div>
 
-        <div className="mt-5 space-y-3">
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/60">
-            <div className="flex items-center gap-3">
-              <FaLayerGroup className="text-blue-600" />
-              <div>
-                <p className="text-sm font-black text-gray-900 dark:text-white">Sector concentration</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {dashboardInsights.topSector
-                    ? `${dashboardInsights.topSector[0]} leads with ${dashboardInsights.topSector[1]} tracked stock${dashboardInsights.topSector[1] > 1 ? "s" : ""}.`
-                    : "Save stocks to calculate concentration."}
-                </p>
-              </div>
+        <div className="mt-5 rounded-lg bg-gray-50 p-4 dark:bg-gray-900/60">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-black text-gray-900 dark:text-white">
+                {primaryCandidate ? `${primaryCandidate.ticker} is next to analyze` : "No forecast candidate yet"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                {primaryCandidate
+                  ? `${primaryCandidate.name} has the strongest current move in your ${bookmarks.length > 0 ? "watchlist" : "market"} view.`
+                  : "Save stocks or browse the stock list to build a prediction queue."}
+              </p>
             </div>
+            {primaryCandidate && (
+              <div className="text-right">
+                <p className={`text-lg font-black ${primaryChange >= 0 ? "text-green-600" : "text-red-500"}`}>
+                  {primaryCandidate.change}
+                </p>
+                <p className="text-[11px] font-bold uppercase text-gray-400">{trendDirection}</p>
+              </div>
+            )}
           </div>
 
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/60">
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-white p-3 dark:bg-gray-800">
+              <p className="text-xs font-bold uppercase text-gray-400">Confidence</p>
+              <p className="mt-1 text-2xl font-black text-gray-900 dark:text-white">
+                {confidenceScore ? `${confidenceScore}%` : "--"}
+              </p>
+            </div>
+            <div className="rounded-lg bg-white p-3 dark:bg-gray-800">
+              <p className="text-xs font-bold uppercase text-gray-400">Horizon</p>
+              <p className="mt-1 text-2xl font-black text-gray-900 dark:text-white">3-7d</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {predictionCandidates.map((stock) => {
+            const changeValue = parseChange(stock.change);
+            return (
+              <button
+                key={stock.id}
+                type="button"
+                onClick={() => navigate("/prediction-panel")}
+                className="flex w-full items-center justify-between rounded-lg border border-gray-100 px-4 py-3 text-left transition-colors hover:border-blue-200 hover:bg-blue-50 dark:border-gray-700 dark:hover:border-blue-900 dark:hover:bg-blue-900/20"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-black text-gray-900 dark:text-white">{stock.ticker}</p>
+                  <p className="mt-1 truncate text-xs font-semibold text-gray-400">{stock.name} - {stock.sector}</p>
+                </div>
+                <span className={`text-sm font-black ${changeValue >= 0 ? "text-green-600" : "text-red-500"}`}>
+                  {stock.change}
+                </span>
+              </button>
+            );
+          })}
+
+          {predictionCandidates.length === 0 && (
+            <div className="rounded-lg border border-dashed border-gray-200 p-4 text-center dark:border-gray-700">
+              <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Prediction candidates will appear here.</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3">
+          <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
             <div className="flex items-center gap-3">
-              <FaChartPie className="text-green-600" />
+              <FaCrown className={subscribed ? "text-green-600" : "text-amber-500"} />
               <div>
-                <p className="text-sm font-black text-gray-900 dark:text-white">Prediction readiness</p>
+                <p className="text-sm font-black text-gray-900 dark:text-white">Prediction access</p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {subscribed
-                    ? "Prediction access is active for deeper stock forecasting."
-                    : "Pricing access is required before forecasts can be generated."}
+                    ? "Forecast tools are active for deeper analysis."
+                    : "Upgrade access before generating full forecasts."}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/60">
-            <div className="flex items-center gap-3">
-              <FaBell className="text-amber-500" />
-              <div>
-                <p className="text-sm font-black text-gray-900 dark:text-white">Alert quality</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {dashboardInsights.savedTickers.length > 0
-                    ? `${dashboardInsights.savedTickers.length} ticker${dashboardInsights.savedTickers.length > 1 ? "s" : ""} can be matched against business news.`
-                    : "Save stocks to personalize notification relevance."}
-                </p>
-              </div>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/prediction-panel")}
+            className="flex w-full items-center justify-between rounded-lg bg-gray-950 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-blue-700 dark:bg-white dark:text-gray-950 dark:hover:bg-blue-100"
+          >
+            Open Prediction Panel
+            <FaArrowRight />
+          </button>
         </div>
       </section>
     </div>

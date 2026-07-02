@@ -10,11 +10,14 @@ import {
   FaSignInAlt,
   FaSun,
   FaTimes,
+  FaUserCircle,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 import { useTheme } from "../context/ThemeContext";
 import { newsData, stockListData } from "../data/appData";
+
+const API_BASE = "/api";
 
 function Navbar() {
   const { isDark, toggleTheme } = useTheme();
@@ -23,8 +26,61 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState(() => localStorage.getItem("profile_picture_url") || "");
+  const [username, setUsername] = useState(() => localStorage.getItem("display_name") || localStorage.getItem("username") || "User");
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
+
+  useEffect(() => {
+    const syncProfilePicture = () => {
+      setProfilePictureUrl(localStorage.getItem("profile_picture_url") || "");
+      setUsername(localStorage.getItem("display_name") || localStorage.getItem("username") || "User");
+    };
+
+    const fetchProfilePicture = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        localStorage.removeItem("profile_picture_url");
+        syncProfilePicture();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/users/profile/`, {
+          headers: { "Authorization": `Token ${token}` },
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not load profile picture.");
+        }
+
+        const data = await response.json();
+        const pictureUrl = data.profile_picture_url || data.profile_picture || "";
+        if (pictureUrl) {
+          localStorage.setItem("profile_picture_url", pictureUrl);
+        } else {
+          localStorage.removeItem("profile_picture_url");
+        }
+        if (data.username) {
+          localStorage.setItem("username", data.username);
+        }
+        localStorage.setItem("display_name", data.full_name || data.username || "User");
+      } catch (profileError) {
+        console.error("Could not load profile picture:", profileError);
+      } finally {
+        syncProfilePicture();
+      }
+    };
+
+    fetchProfilePicture();
+    window.addEventListener("auth-user-changed", fetchProfilePicture);
+    window.addEventListener("profile-picture-updated", syncProfilePicture);
+
+    return () => {
+      window.removeEventListener("auth-user-changed", fetchProfilePicture);
+      window.removeEventListener("profile-picture-updated", syncProfilePicture);
+    };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -267,8 +323,22 @@ function Navbar() {
           <div
             onClick={() => navigate("/profile")}
             className="border-2 border-gray-200 w-10 h-10 rounded-full cursor-pointer overflow-hidden hover:border-blue-500 transition-colors"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                navigate("/profile");
+              }
+            }}
           >
-            <img src="/images/profile.jpg" alt="profile" className="object-cover w-full h-full" />
+            {profilePictureUrl ? (
+              <img src={profilePictureUrl} alt={`${username} profile`} className="object-cover w-full h-full" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+                <FaUserCircle className="h-8 w-8" />
+              </div>
+            )}
           </div>
         </div>
       </div>

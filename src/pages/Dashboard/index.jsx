@@ -6,11 +6,12 @@ import Graphanalysis from "./components/graphAnalysis";
 import NewsSection from "./components/newsSection";
 
 function Dashboard() {
-    const [username, setUsername] = useState(() => localStorage.getItem("username") || "User");
+    const getDisplayName = () => localStorage.getItem("display_name") || localStorage.getItem("username") || "User";
+    const [username, setUsername] = useState(getDisplayName);
 
     useEffect(() => {
         const syncUsername = () => {
-            setUsername(localStorage.getItem("username") || "User");
+            setUsername(getDisplayName());
         };
 
         window.addEventListener("auth-user-changed", syncUsername);
