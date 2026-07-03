@@ -13,7 +13,7 @@ import Auth from "./pages/Auth/Auth";
 import Profile from "./components/ProfileModal";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import Pricing from "./pages/Pricing";
-import StockDetail from "./pages/StockListing/components/StockDetail";
+import KhaltiReturn from "./pages/Payment/KhaltiReturn";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -24,9 +24,9 @@ function MainLayout({ children }) {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex min-w-0 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 min-w-0 overflow-auto">
           {children}
         </main>
       </div>
@@ -66,6 +66,11 @@ function App() {
         <Route path="/pricing" element={
           <ProtectedRoute>
             <MainLayout><Pricing /></MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/payment/khalti/return" element={
+          <ProtectedRoute>
+            <MainLayout><KhaltiReturn /></MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/news" element={

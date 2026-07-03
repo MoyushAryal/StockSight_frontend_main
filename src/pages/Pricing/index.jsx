@@ -1,6 +1,5 @@
-import React from "react";
-import { FaBolt, FaCheck, FaCrown, FaGem, FaHardHat } from "react-icons/fa";
-import { activateSubscription } from "../../utils/subscription";
+import React, { useState } from "react";
+import { FaBolt, FaCheck, FaCrown, FaGem, FaHardHat, FaSpinner } from "react-icons/fa";
 
 const plans = [
   {
@@ -18,6 +17,7 @@ const plans = [
     button: "Current plan",
     featured: false,
     underConstruction: false,
+    paid: false,
   },
   {
     name: "StockSight Pro",
@@ -34,6 +34,8 @@ const plans = [
     button: "Upgrade to Pro",
     featured: true,
     underConstruction: false,
+    paid: true,
+    amountPaisa: 300000,
   },
   {
     name: "StockSight Plus",
@@ -50,13 +52,55 @@ const plans = [
     button: "Coming soon",
     featured: false,
     underConstruction: true,
+    paid: true,
+    amountPaisa: 500000,
   },
 ];
 
 function Pricing() {
-  const handlePlanClick = (plan) => {
-    if (plan.underConstruction || plan.name === "Free") return;
-    activateSubscription(plan.name);
+  const [loadingPlan, setLoadingPlan] = useState("");
+  const [paymentError, setPaymentError] = useState("");
+
+  const handlePlanClick = async (plan) => {
+    if (plan.underConstruction) return;
+
+    if (!plan.paid) return;
+
+    setPaymentError("");
+    setLoadingPlan(plan.name);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/payments/khalti/initiate/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Token ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          plan: plan.name,
+          amount: plan.amountPaisa,
+          return_url: `${window.location.origin}/payment/khalti/return`,
+          website_url: window.location.origin,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.detail || data.error || "Could not start Khalti payment.");
+      }
+
+      const paymentUrl = data.payment_url || data.paymentUrl;
+      if (!paymentUrl) {
+        throw new Error("Payment URL was not returned by the backend.");
+      }
+
+      window.location.href = paymentUrl;
+    } catch (error) {
+      setPaymentError(error.message);
+      setLoadingPlan("");
+    }
   };
 
   return (
@@ -70,6 +114,11 @@ function Pricing() {
           <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
             Choose the StockSight plan that fits how often you forecast.
           </p>
+          {paymentError && (
+            <p className="mx-auto mt-4 max-w-xl rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 dark:bg-red-900/20 dark:text-red-300">
+              {paymentError}
+            </p>
+          )}
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
@@ -139,7 +188,7 @@ function Pricing() {
                 <button
                   type="button"
                   onClick={() => handlePlanClick(plan)}
-                  disabled={plan.underConstruction}
+                  disabled={plan.underConstruction || loadingPlan === plan.name}
                   className={`mt-8 w-full rounded-full py-3 text-sm font-black transition-colors ${
                     plan.underConstruction
                       ? "cursor-not-allowed bg-amber-200 text-amber-900"
@@ -148,7 +197,11 @@ function Pricing() {
                       : "bg-gray-100 text-gray-700 hover:bg-blue-600 hover:text-white dark:bg-gray-700 dark:text-gray-100"
                   }`}
                 >
-                  {plan.button}
+                  {loadingPlan === plan.name ? (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <FaSpinner className="animate-spin" /> Opening Khalti
+                    </span>
+                  ) : plan.button}
                 </button>
               </div>
             );
