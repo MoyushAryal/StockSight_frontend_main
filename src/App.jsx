@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Prediction from "./pages/Prediction";
 import StockPredictionResult from "./pages/Prediction/components/prediction_result";
 import StockListing from "./pages/StockListing";
+import StockDetail from "./pages/StockListing/components/StockDetail";
 import News from "./pages/News";
 import NewsDetail from "./pages/News/NewsDetail";
 import BookmarkPage from "./pages/Bookmark";
