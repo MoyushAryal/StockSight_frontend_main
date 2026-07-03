@@ -10,16 +10,11 @@ function Mainframe({ stocks }) {
 
   const fetchBookmarks = useCallback(async () => {
     if (!token) return;
-
     try {
       const response = await fetch(`${API_BASE}/bookmarks/`, {
         headers: { "Authorization": `Token ${token}` },
       });
-
-      if (!response.ok) {
-        throw new Error("Could not load bookmarks.");
-      }
-
+      if (!response.ok) throw new Error("Could not load bookmarks.");
       const data = await response.json();
       setBookmarks(data);
     } catch (error) {
@@ -27,9 +22,7 @@ function Mainframe({ stocks }) {
     }
   }, [token]);
 
-  useEffect(() => {
-    fetchBookmarks();
-  }, [fetchBookmarks]);
+  useEffect(() => { fetchBookmarks(); }, [fetchBookmarks]);
 
   return (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg transition-colors duration-300">

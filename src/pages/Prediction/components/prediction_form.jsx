@@ -1,41 +1,37 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
-import { FaArrowRight, FaCrown } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom";
+import { FaArrowRight, FaCrown, FaChartLine } from "react-icons/fa";
+ 
 const PredictionForm = () => {
   const [ticker, setTicker] = useState("");
-  const navigate = useNavigate();
-  const [days, setDays] = useState(3);
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
+ 
   const handlePredict = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+ 
     try {
       const token = localStorage.getItem("token");
-
+ 
       const response = await fetch("/api/prediction/predict/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Token ${token}`,
+          Authorization: `Token ${token}`,
         },
-        body: JSON.stringify({ ticker, days }),
+        body: JSON.stringify({ ticker }),
       });
-
+ 
       const data = await response.json();
-      navigate("/predict/result", {
-        state: { ticker, days, predictData: data },
-      });
-
+      navigate("/predict/result", { state: { ticker, predictData: data } });
     } catch (error) {
       console.error("Prediction error:", error);
     } finally {
-       setLoading(false);
+      setLoading(false);
     }
   };
-
+ 
   return (
     <div className="w-full max-w-md">
       <button
@@ -54,13 +50,21 @@ const PredictionForm = () => {
         </span>
         <FaArrowRight className="text-sm" />
       </button>
-
+ 
       <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Stock Prediction</h2>
-
+        <div className="flex items-center gap-2 mb-1">
+          <FaChartLine className="text-blue-500" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Stock Direction</h2>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Predicts whether a stock will trend up or down over the next 20 trading days.
+        </p>
+ 
         <form className="space-y-4" onSubmit={handlePredict}>
           <div>
-            <label className="block mb-1 text-sm font-semibold text-gray-600 dark:text-gray-300">Ticker Symbol</label>
+            <label className="block mb-1 text-sm font-semibold text-gray-600 dark:text-gray-300">
+              Ticker Symbol
+            </label>
             <input
               type="text"
               placeholder="e.g. AAPL"
@@ -70,25 +74,11 @@ const PredictionForm = () => {
               required
             />
           </div>
-
-          <div>
-            <label className="block mb-1 text-sm font-semibold text-gray-600 dark:text-gray-300">Days Ahead</label>
-            <select
-              value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
-              className="w-full p-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
-            >
-              <option value={1}>1 Day</option>
-              <option value={3}>3 Days</option>
-              <option value={7}>7 Days</option>
-              <option value={14}>14 Days</option>
-            </select>
-          </div>
-
+ 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+            disabled={loading || !ticker}
+            className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 disabled:opacity-60 transition"
           >
             {loading ? "Predicting..." : "Predict"}
           </button>
@@ -97,5 +87,5 @@ const PredictionForm = () => {
     </div>
   );
 };
-
+ 
 export default PredictionForm;

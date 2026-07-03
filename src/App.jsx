@@ -11,8 +11,9 @@ import NewsDetail from "./pages/News/NewsDetail";
 import BookmarkPage from "./pages/Bookmark";
 import Auth from "./pages/Auth/Auth";
 import Profile from "./components/ProfileModal";
-import ResetPassword from "./pages/Auth/ResetPassword"; 
+import ResetPassword from "./pages/Auth/ResetPassword";
 import Pricing from "./pages/Pricing";
+import StockDetail from "./pages/StockListing/components/StockDetail";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -37,9 +38,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        
+
         <Route path="/login" element={<Auth />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} /> 
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Protected routes */}
         <Route path="/" element={
@@ -80,7 +81,8 @@ function App() {
         <Route path="/predict/result" element={
           <ProtectedRoute>
             <MainLayout><StockPredictionResult /></MainLayout>
-          </ProtectedRoute>} />
+          </ProtectedRoute>
+        } />
         <Route path="/bookmarks" element={
           <ProtectedRoute>
             <MainLayout><BookmarkPage /></MainLayout>
@@ -89,6 +91,11 @@ function App() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <MainLayout><Profile /></MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/stocks/:ticker" element={
+          <ProtectedRoute>
+            <MainLayout><StockDetail /></MainLayout>
           </ProtectedRoute>
         } />
 

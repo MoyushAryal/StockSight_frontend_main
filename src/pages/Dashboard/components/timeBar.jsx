@@ -1,15 +1,33 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRight, FaChartLine, FaCrown, FaSignal } from "react-icons/fa";
-import { stocksData } from "../../../data/appData";
 import { getBookmarkTicker } from "../../../utils/bookmarkNews";
 import { isUserSubscribed } from "../../../utils/subscription";
 
 const API_BASE = "/api";
-const parseChange = (change) => Number.parseFloat(String(change).replace("%", "")) || 0;
+
+// API returns `change` as a plain number (e.g. 2.35 or -1.12), but this stays
+// defensive in case it ever comes back as a string with a trailing "%".
+const parseChange = (change) => {
+  const num = Number.parseFloat(String(change).replace("%", ""));
+  return Number.isNaN(num) ? 0 : num;
+};
+
+const formatChange = (change) => {
+  const num = parseChange(change);
+  return `${num > 0 ? "+" : ""}${num.toFixed(2)}%`;
+};
+
+const formatPrice = (close) => {
+  const num = Number(close);
+  return Number.isNaN(num) ? "--" : `$${num.toFixed(2)}`;
+};
 
 function Timebar() {
   const [bookmarks, setBookmarks] = useState([]);
+  const [stocksData, setStocksData] = useState([]);
+  const [stocksLoading, setStocksLoading] = useState(true);
+  const [stocksError, setStocksError] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
@@ -33,6 +51,47 @@ function Timebar() {
     return () => window.removeEventListener("bookmarkUpdated", fetchBookmarks);
   }, [token]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchStocks = async () => {
+      setStocksLoading(true);
+      setStocksError(null);
+      try {
+        const response = await fetch(`${API_BASE}/stocks/`, {
+          headers: token ? { Authorization: `Token ${token}` } : undefined,
+        });
+        if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+        const raw = await response.json();
+        const list = Array.isArray(raw) ? raw : raw.results || [];
+
+        const normalized = list.map((stock) => ({
+          id: stock.id,
+          ticker: stock.ticker,
+          name: stock.name,
+          sector: stock.sector,
+          exchange: stock.exchange,
+          price: formatPrice(stock.close),
+          change: formatChange(stock.change),
+        }));
+
+        if (!cancelled) setStocksData(normalized);
+      } catch (error) {
+        console.error("Stock list fetch error:", error);
+        if (!cancelled) setStocksError("Unable to load live market data.");
+      } finally {
+        if (!cancelled) setStocksLoading(false);
+      }
+    };
+
+    fetchStocks();
+    const interval = setInterval(fetchStocks, 60 * 1000); // refresh every minute
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [token]);
+
   const dashboardInsights = useMemo(() => {
     const savedTickers = bookmarks.map(bookmark => getBookmarkTicker(bookmark)).filter(Boolean);
     const savedStocks = stocksData.filter(stock => savedTickers.includes(stock.ticker));
@@ -45,9 +104,13 @@ function Timebar() {
     const volatileStocks = source
       .filter(stock => Math.abs(parseChange(stock.change)) >= 1)
       .sort((a, b) => Math.abs(parseChange(b.change)) - Math.abs(parseChange(a.change)));
-    const averageMove = source.reduce((sum, stock) => sum + parseChange(stock.change), 0) / source.length;
+    const averageMove = source.length
+      ? source.reduce((sum, stock) => sum + parseChange(stock.change), 0) / source.length
+      : 0;
     const positiveCount = source.filter(stock => parseChange(stock.change) > 0).length;
-    const coverage = Math.round((savedStocks.length / stocksData.length) * 100);
+    const coverage = stocksData.length
+      ? Math.round((savedStocks.length / stocksData.length) * 100)
+      : 0;
 
     return {
       savedTickers,
@@ -58,16 +121,16 @@ function Timebar() {
       positiveCount,
       coverage,
     };
-  }, [bookmarks]);
+  }, [bookmarks, stocksData]);
 
   const subscribed = isUserSubscribed();
-  const predictionCandidates = dashboardInsights.volatileStocks.slice(0, 3);
+  const predictionCandidates = [...dashboardInsights.source]
+    .filter((stock) => parseChange(stock.change) > 0)
+    .sort((a, b) => parseChange(b.change) - parseChange(a.change))
+    .slice(0, 3);
   const primaryCandidate = predictionCandidates[0];
   const primaryChange = primaryCandidate ? parseChange(primaryCandidate.change) : 0;
-  const trendDirection = primaryChange >= 0 ? "Bullish" : "Bearish";
-  const confidenceScore = primaryCandidate
-    ? Math.min(94, Math.max(62, Math.round(68 + Math.abs(primaryChange) * 7)))
-    : 0;
+  const trendDirection = "Bullish";
 
   return (
     <div className="grid flex-1 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.95fr)] 2xl:min-w-0">
@@ -85,11 +148,17 @@ function Timebar() {
           </span>
         </div>
 
+        {stocksError && (
+          <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 dark:bg-red-900/20 dark:text-red-300">
+            {stocksError}
+          </p>
+        )}
+
         <div className="mt-5 grid gap-3 md:grid-cols-4">
           <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
             <p className="text-xs font-bold uppercase text-blue-600 dark:text-blue-300">Avg move</p>
             <p className="mt-2 text-2xl font-black text-gray-900 dark:text-white">
-              {dashboardInsights.averageMove > 0 ? "+" : ""}{dashboardInsights.averageMove.toFixed(2)}%
+              {stocksLoading ? "--" : `${dashboardInsights.averageMove > 0 ? "+" : ""}${dashboardInsights.averageMove.toFixed(2)}%`}
             </p>
           </div>
           <div className="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
@@ -107,6 +176,12 @@ function Timebar() {
         </div>
 
         <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {stocksLoading && (
+            <p className="col-span-2 text-sm font-semibold text-gray-400">Loading live movers...</p>
+          )}
+          {!stocksLoading && dashboardInsights.volatileStocks.length === 0 && (
+            <p className="col-span-2 text-sm font-semibold text-gray-400">No significant moves right now.</p>
+          )}
           {dashboardInsights.volatileStocks.slice(0, 4).map((stock) => {
             const changeValue = parseChange(stock.change);
             return (
@@ -161,19 +236,6 @@ function Timebar() {
                 <p className="text-[11px] font-bold uppercase text-gray-400">{trendDirection}</p>
               </div>
             )}
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-white p-3 dark:bg-gray-800">
-              <p className="text-xs font-bold uppercase text-gray-400">Confidence</p>
-              <p className="mt-1 text-2xl font-black text-gray-900 dark:text-white">
-                {confidenceScore ? `${confidenceScore}%` : "--"}
-              </p>
-            </div>
-            <div className="rounded-lg bg-white p-3 dark:bg-gray-800">
-              <p className="text-xs font-bold uppercase text-gray-400">Horizon</p>
-              <p className="mt-1 text-2xl font-black text-gray-900 dark:text-white">3-7d</p>
-            </div>
           </div>
         </div>
 
